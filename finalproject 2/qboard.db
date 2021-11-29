@@ -1,0 +1,2 @@
+CREATE TABLE users(username varchar(255), password varchar(255), user_id int);
+CREATE TABLE classes(user_id int, classes varchar(255));
