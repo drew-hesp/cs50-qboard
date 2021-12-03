@@ -92,34 +92,46 @@ def logout():
 def register():
     """Register user"""
 
+    # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
-        # Check if a field is left blank
-        if not request.form.get("username") or not request.form.get("password") or not request.form.get("confirmation"):
-            return apology("Field was left blank", 400)
-
-        # Check if password and confirmation don't match
-        if request.form.get("password") != request.form.get("confirmation"):
-            return apology("Password doesn't match confirmation password.", 400)
-
-        # Check if the username is already taken
-        match = db.execute("SELECT username FROM users WHERE username = ?", request.form.get("username"))
-        if len(match) != 0:
-            return apology("Username is already taken", 400)
-
-        # Get form data
         username = request.form.get("username")
-        hashed_password = generate_password_hash(request.form.get("password"))        
+        password = request.form.get("password")
 
-        # Add to database
-        db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username, hashed_password)
+        # Ensure username was submitted
+        if not username:
+            return apology("must provide username", 400)
 
-        # Go back to homepage
+        # Ensure password was submitted
+        elif not password:
+            return apology("must provide password", 400)
+
+        # Ensure password and confirmation match
+        elif not password == request.form.get("confirmation"):
+            return apology("Passwords must match.", 400) 
+        
+        # Personal touch: ensure password is at least 8 characters long
+        elif not len(password) >= 8:
+            return apology("Password must be at least 8 characters.", 400)
+
+        # Check that the username is not already taken
+        elif not len(db.execute("SELECT * FROM users WHERE username = ?", username)) == 0:
+            return apology("Must register with a unique username!", 400)
+
+        # Hash the user's password
+        pass_hash = generate_password_hash(password)
+
+        # Insert new user's username and hash into finance.db
+        user_id = db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username, pass_hash)
+
+        # Log the user in and store their login session
+        session["user_id"] = user_id
+
+        # Redirect user to home page
         return redirect("/")
 
+    # User reached route via GET (as by clicking a link or via redirect)
     else:
-
-        # Render users page
         return render_template("register.html")
 
 
