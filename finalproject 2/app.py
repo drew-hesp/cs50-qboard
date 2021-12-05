@@ -95,8 +95,13 @@ def register():
     # User reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
 
+        email = request.form.get("email")
         username = request.form.get("username")
         password = request.form.get("password")
+
+        # Ensure email was submitted
+        if not email:
+            return apology("must provide email")
 
         # Ensure username was submitted
         if not username:
@@ -105,6 +110,10 @@ def register():
         # Ensure password was submitted
         elif not password:
             return apology("must provide password", 400)
+        
+        # Ensure email is harvard.college.edu
+        if email.index("@college.harvard.edu") == -1:
+            return apology("Must have a harvard email.", 400)
 
         # Ensure password and confirmation match
         elif not password == request.form.get("confirmation"):
